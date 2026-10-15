@@ -153,7 +153,25 @@
         console.error("LIFF Initialization failed", err);
     }
 }
-    
+
+        async function shareToLine(storeName, promotion) {
+    if (liff.isApiAvailable('shareTargetPicker')) {
+        try {
+            await liff.shareTargetPicker([
+                {
+                    "type": "text",
+                    "text": `ไปร้าน ${storeName} กัน! ตอนนี้มีโปร ${promotion} 🍻`
+                }
+                // *หมายเหตุ: ในการใช้งานจริง แนะนำให้เปลี่ยนจาก Text เป็น Flex Message (รูปแบบการ์ดสวยงาม)
+            ]);
+            console.log("แชร์ข้อความสำเร็จ!");
+        } catch (error) {
+            console.error("เกิดข้อผิดพลาดในการแชร์:", error);
+        }
+    } else {
+        alert("กรุณาเปิดแอปนี้ผ่าน LINE เพื่อใช้งานฟีเจอร์แชร์");
+    }
+}
         
         const App = () => {
             const [modal, setModal] = React.useState(null); // null, 'menu', 'share', 'info'
