@@ -1,0 +1,278 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangout App MVP (React Build)</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1E1E1E;
+            --text-main: #FFFFFF;
+            --text-sub: #A0A0A0;
+            --accent-primary: #FF3B30;
+            --accent-secondary: #00C300;
+            --border-color: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 414px;
+            min-height: 100vh;
+            background-color: var(--bg-dark);
+            position: relative;
+            padding-bottom: 90px;
+            overflow-x: hidden;
+        }
+        .header {
+            padding: 20px 15px 10px 15px;
+            position: sticky;
+            top: 0;
+            background-color: rgba(18, 18, 18, 0.95);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #FF3B30, #FF9500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .location-badge {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .mvp-banner {
+            background-color: rgba(0, 195, 0, 0.1);
+            color: var(--accent-secondary);
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(0, 195, 0, 0.3);
+            margin-bottom: 10px;
+        }
+        .section { padding: 10px 15px; }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+        }
+        .scroll-container::-webkit-scrollbar { display: none; }
+        .card {
+            min-width: 220px;
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+        }
+        .card-img { height: 130px; background-color: #333; background-size: cover; background-position: center; position: relative; }
+        .promo-badge {
+            position: absolute; top: 10px; left: 10px; background-color: var(--accent-primary);
+            color: white; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px;
+        }
+        .card-info { padding: 12px; }
+        .card-title { font-size: 16px; font-weight: bold; margin: 0 0 5px 0; }
+        .card-meta { font-size: 12px; color: var(--text-sub); margin: 0 0 10px 0; }
+        .action-btn-container { display: flex; gap: 10px; }
+        .btn-share {
+            background-color: var(--accent-secondary); color: white; border: none;
+            border-radius: 20px; padding: 8px 12px; font-size: 12px; font-weight: bold; cursor: pointer; flex-grow: 1;
+        }
+        .btn-menu {
+            background-color: #333; color: white; border: none;
+            border-radius: 20px; padding: 8px 12px; font-size: 12px; cursor: pointer; flex-grow: 1;
+        }
+        .list-item {
+            display: flex; background-color: var(--bg-card); border-radius: 12px; padding: 12px;
+            margin-bottom: 10px; border: 1px solid var(--border-color); align-items: center;
+        }
+        .list-img { width: 50px; height: 50px; border-radius: 8px; margin-right: 15px; background-size: cover; }
+        .list-content { flex-grow: 1; }
+        .list-title { font-size: 15px; font-weight: bold; margin: 0 0 4px 0; }
+        .list-sub { font-size: 12px; color: var(--accent-primary); margin: 0; }
+        .time-text { color: white; font-size: 14px; background: #333; padding: 4px 8px; border-radius: 4px; }
+        .game-banner {
+            background: linear-gradient(135deg, #8E2DE2, #4A00E0); border-radius: 12px;
+            padding: 15px; display: flex; align-items: center; justify-content: space-between; margin: 10px 15px; cursor: pointer;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background-color: var(--bg-card); width: 85%; max-width: 320px;
+            border-radius: 15px; padding: 25px; text-align: center; border: 1px solid var(--border-color);
+        }
+        .modal-close {
+            background-color: #444; color: white; border: none; padding: 12px 20px;
+            border-radius: 25px; font-size: 14px; cursor: pointer; margin-top: 20px; width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const App = () => {
+            const [modal, setModal] = React.useState(null); // null, 'menu', 'share', 'info'
+            const [modalData, setModalData] = React.useState({});
+
+            const openShare = (name, highlight) => {
+                setModalData({ name, highlight });
+                setModal('share');
+            };
+
+            const openMenu = (name) => {
+                setModalData({ name });
+                setModal('menu');
+            };
+
+            const openInfo = (title, desc) => {
+                setModalData({ title, desc });
+                setModal('info');
+            };
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <div className="logo">Hangout</div>
+                        <div className="location-badge" onClick={() => openInfo('พิกัด (PostGIS)', 'จำลองการดึง Location เพื่อส่งไปคำนวณหาร้านที่ใกล้ที่สุดใน Backend (Node.js/PostgreSQL)')}>
+                            📍 เอกมัย, กทม.
+                        </div>
+                    </div>
+                    
+                    <div className="mvp-banner">
+                        🚀 <b>Phase 1 MVP</b>: Frontend React (Web View) + Backend Node.js
+                    </div>
+
+                    {/* Near Me Section */}
+                    <div className="section">
+                        <h3 className="section-title">📍 ร้านชิวใกล้คุณ (Near Me)</h3>
+                        <div className="scroll-container">
+                            <div className="card">
+                                <div className="card-img" style={{backgroundImage: "url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=200&fit=crop')"}}>
+                                    <div className="promo-badge">เบียร์ 1 แถม 1</div>
+                                </div>
+                                <div className="card-info">
+                                    <h4 className="card-title">The Rusty Anchor</h4>
+                                    <p className="card-meta">📍 300 ม. • 🍺 คราฟต์เบียร์</p>
+                                    <div className="action-btn-container">
+                                        <button className="btn-share" onClick={() => openShare('The Rusty Anchor', 'โปรฯ เบียร์ 1 แถม 1')}>💬 ชวนเพื่อน (LIFF)</button>
+                                        <button className="btn-menu" onClick={() => openMenu('The Rusty Anchor')}>📖 ดูเมนู</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="card">
+                                <div className="card-img" style={{backgroundImage: "url('https://images.unsplash.com/photo-1572116469696-31de0f17ce67?w=400&h=200&fit=crop')"}}>
+                                    <div className="promo-badge" style={{background: '#8E2DE2'}}>มีวงดนตรีสด</div>
+                                </div>
+                                <div className="card-info">
+                                    <h4 className="card-title">Neon Lounge</h4>
+                                    <p className="card-meta">📍 800 ม. • 🍸 ค็อกเทล</p>
+                                    <div className="action-btn-container">
+                                        <button className="btn-share" onClick={() => openShare('Neon Lounge', 'วงดนตรีสดคืนนี้')}>💬 ชวนเพื่อน (LIFF)</button>
+                                        <button className="btn-menu" onClick={() => openMenu('Neon Lounge')}>📖 ดูเมนู</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Live Bands Section */}
+                    <div className="section">
+                        <h3 className="section-title">🎸 คิววงดนตรีสดคืนนี้</h3>
+                        <div className="list-item" onClick={() => openShare('Velvet Echoes', 'เล่นที่ร้าน Craft Beer Co. เวลา 20:30')}>
+                            <div className="list-img" style={{backgroundImage: "url('https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=150&h=150&fit=crop')"}}></div>
+                            <div className="list-content">
+                                <h4 className="list-title">Velvet Echoes</h4>
+                                <p className="list-sub">📍 Craft Beer Co.</p>
+                            </div>
+                            <span className="time-text">20:30</span>
+                        </div>
+                        <div className="list-item" onClick={() => openShare('The Midnighters', 'เล่นที่ร้าน The Overpass เวลา 22:00')}>
+                            <div className="list-img" style={{backgroundImage: "url('https://images.unsplash.com/photo-1493225457124-a1a2a5f5f9af?w=150&h=150&fit=crop')"}}></div>
+                            <div className="list-content">
+                                <h4 className="list-title">The Midnighters</h4>
+                                <p className="list-sub">📍 The Overpass</p>
+                            </div>
+                            <span className="time-text">22:00</span>
+                        </div>
+                    </div>
+
+                    {/* Party Games Section */}
+                    <div className="game-banner" onClick={() => openInfo('มินิเกมวงเหล้า', 'เกมบน Web View เขียนด้วย React สุ่มค่าเล่นๆ บนโต๊ะ ไม่ต้องยิง API ให้เปลือง Server')}>
+                        <div>
+                            <h3 style={{margin: '0 0 5px 0', fontSize: '16px'}}>🎲 มินิเกมวงเหล้า</h3>
+                            <p style={{margin: 0, fontSize: '12px', color: '#ddd'}}>เล่นฟรี! หมุนขวดสุ่ม, ใบ้คำ</p>
+                        </div>
+                        <div style={{fontSize: '30px'}}>🍾</div>
+                    </div>
+
+                    {/* Modals */}
+                    {modal === 'info' && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h3 style={{marginTop: 0}}>{modalData.title}</h3>
+                                <p style={{color: 'var(--text-sub)', fontSize: '14px'}}>{modalData.desc}</p>
+                                <button className="modal-close" onClick={() => setModal(null)}>ปิด</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {modal === 'menu' && (
+                        <div className="modal-overlay">
+                            <div className="modal-content">
+                                <h3 style={{marginTop: 0}}>เมนู: {modalData.name}</h3>
+                                <p style={{fontSize: '12px', color: 'var(--text-sub)'}}>*Phase 1: ดึงรูปเมนูจาก Amazon S3 / GCS</p>
+                                <div style={{width: '100%', height: '250px', background: "url('https://images.unsplash.com/photo-1559314809-0d155014e29e?w=400&h=600&fit=crop') center/cover", borderRadius: '10px'}}></div>
+                                <button className="modal-close" onClick={() => setModal(null)}>ปิดเมนู</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {modal === 'share' && (
+                        <div className="modal-overlay">
+                            <div className="modal-content" style={{border: '2px solid var(--accent-secondary)'}}>
+                                <div style={{fontSize: '40px', marginBottom: '10px'}}>💬</div>
+                                <h3 style={{marginTop: 0}}>จำลอง LINE Share Target Picker</h3>
+                                <p style={{color: 'var(--text-sub)', fontSize: '14px'}}>ส่ง <strong>{modalData.name}</strong> เข้าแชทกลุ่ม</p>
+                                <div style={{background: '#222', padding: '12px', borderRadius: '8px', fontSize: '12px', textAlign: 'left', borderLeft: '3px solid var(--accent-secondary)'}}>
+                                    <strong style={{color: 'white'}}>Flex Message Payload:</strong><br/>
+                                    "ไปร้านนี้กัน! มี <span style={{color: 'var(--accent-secondary)'}}>{modalData.highlight}</span>"
+                                </div>
+                                <button className="modal-close" style={{backgroundColor: 'var(--accent-secondary)'}} onClick={() => setModal(null)}>ส่งสำเร็จ</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
