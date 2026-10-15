@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         :root {
             --bg-dark: #121212;
@@ -137,6 +138,23 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        
+    const liffId = "2012036130-Fsmdn3ac";
+        async function initializeLiff() {
+    try {
+        await liff.init({ liffId: liffId });
+        if (!liff.isLoggedIn()) {
+            liff.login(); // บังคับล็อกอินถ้ายังไม่ได้ล็อกอิน
+        }
+        console.log("LIFF Initialized!");
+        // คุณสามารถดึงข้อมูลโปรไฟล์ (ชื่อ, รูป) ของลูกค้าได้ที่นี่
+        // const profile = await liff.getProfile();
+    } catch (err) {
+        console.error("LIFF Initialization failed", err);
+    }
+}
+    
+        
         const App = () => {
             const [modal, setModal] = React.useState(null); // null, 'menu', 'share', 'info'
             const [modalData, setModalData] = React.useState({});
